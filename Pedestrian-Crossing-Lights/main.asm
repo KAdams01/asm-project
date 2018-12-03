@@ -46,3 +46,13 @@ init:
     ldi r16, 0b11110000        ;set all pins of portb (pinb 1111 0000) to outputs
     out ddrb, r16
     out portb, r16
+    ldi    r16, 0x00
+    out    ddrc, r16            ;set port C to input
+    ldi    r16, 0xff
+    out portc, r16            ;pull-up resistors on C
+    rjmp main
+main:
+    greenLight
+    in        r25, pinc        ;read from port c
+   cpi        r25, 0b11111111 ;compare
+    breq    main            ;jump to main if not equal
