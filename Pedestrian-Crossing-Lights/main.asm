@@ -20,6 +20,21 @@ delay_loop_3:
 	brne delay_loop_1	; total delay in ms = cycles/16000 = 49940219/16000 = 3.121,2636875ms = 3.121s
 .endmacro
 
+.macro shortDelay
+    ldi r20, 0x3f    ; delay_loop_1 = ((1 + 195840 + 1 + 2) * 63) - 1 = 12338171 cycles
+delay_loop_1:
+    ldi r21, 0xff    ; delay_loop_2 = ((1 + 764 + 1 + 2) * 255) - 1 = 195840 cycles
+delay_loop_2:
+    ldi r22, 0xff    ; delay_loop_3 = ((1 + 2) * 255) - 1 = 764 cycles
+delay_loop_3:        
+    dec r22            
+    brne delay_loop_3
+    dec r21
+    brne delay_loop_2
+    dec r20
+    brne delay_loop_1        ; total delay in ms = cycles/16000 = 12338171/16000 = 771,1356875 ms
+.endmacro
+
 .macro redLight
     ldi r16, 0b10000000        ;red light on 13 pin (pinb 1000 0000)
     out portb, r16
@@ -52,7 +67,9 @@ init:
     out portc, r16            ;pull-up resistors on C
     rjmp main
 main:
-    greenLight
+   greenLight
     in        r25, pinc        ;read from port c
    cpi        r25, 0b11111111 ;compare
     breq    main            ;jump to main if not equal
+    shortDelay                ;771ms delay, see shortDelay
+    rjmp    lightSeq        ;run crossing light sequence
